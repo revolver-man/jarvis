@@ -8,7 +8,6 @@ export class Speaker extends EventTarget {
             // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
             if (audio && audio.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
                 this.playing = true
-                console.log('play', this.audios)
                 audio.play()
             }
         }
@@ -21,10 +20,12 @@ export class Speaker extends EventTarget {
         })
         audio.addEventListener("ended", () => {
             this.audios.shift()
-            console.log('stop', this.audios)
             this.playing = false
             this.play()
         })
+        // audio.addEventListener("error", () => {
+
+        // })
         this.audios.push(audio)
     }
 
