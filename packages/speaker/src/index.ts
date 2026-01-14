@@ -13,8 +13,10 @@ export class Speaker extends EventTarget {
         }
     }
 
-    say(src: string) {
-        const audio = new Audio(src)
+    say(blob: Blob): void;
+    say(url: string): void;
+    say(src: string | Blob) {
+        const audio = new Audio()
         audio.addEventListener("canplay", () => {
             this.play()
         })
@@ -23,9 +25,16 @@ export class Speaker extends EventTarget {
             this.playing = false
             this.play()
         })
-        // audio.addEventListener("error", () => {
-
-        // })
+        if (src instanceof Blob) {
+            const url = URL.createObjectURL(src)
+            audio.src = url
+            setTimeout(() => {
+                URL.revokeObjectURL(url)
+            })
+        }
+        else {
+            audio.src = src
+        }
         this.audios.push(audio)
     }
 
