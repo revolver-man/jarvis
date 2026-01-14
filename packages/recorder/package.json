@@ -1,0 +1,21 @@
+{
+  "name": "recorder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "vite test",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "revolver",
+  "license": "ISC",
+  "packageManager": "pnpm@10.20.0",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
