@@ -1,5 +1,6 @@
 export class Recorder extends EventTarget {
     private mediaRecorder: MediaRecorder | null = null
+    private callback: ((blob: Blob) => void) | null = null
     private chunks: Blob[] = []
 
     public disposed = false
@@ -7,10 +8,21 @@ export class Recorder extends EventTarget {
     constructor() {
         super()
         this.ondataavailable = this.ondataavailable.bind(this)
+        this.onstop = this.onstop.bind(this)
     }
 
     private ondataavailable(e: BlobEvent) {
         this.chunks.push(e.data)
+    }
+
+    private onstop() {
+        if (this.callback) {
+            const blob = new Blob(this.chunks, {
+                type: 'audio/webm; codecs=opus',
+            })
+            this.chunks = []
+            this.callback(blob)
+        }
     }
 
     start() {
@@ -25,6 +37,7 @@ export class Recorder extends EventTarget {
                 }).then((stream) => {
                     const mediaRecorder = new MediaRecorder(stream)
                     mediaRecorder.addEventListener("dataavailable", this.ondataavailable)
+                    mediaRecorder.addEventListener("stop", this.onstop)
                     mediaRecorder.start()
                     this.mediaRecorder = mediaRecorder
                 }).catch(() => {
@@ -33,22 +46,18 @@ export class Recorder extends EventTarget {
             }
         }
         else {
-            this.mediaRecorder?.start()
+            if (this.mediaRecorder.state !== 'recording') {
+                this.mediaRecorder.start()
+            }
         }
     }
 
-    stop() {
+    stop(callback: (blob: Blob) => void) {
         if (this.disposed) {
             return
         }
+        this.callback = callback
         this.mediaRecorder?.stop()
-        return new Promise((resolve) => {
-            const blob = new Blob(this.chunks, {
-                type: 'audio/ogg',
-            })
-            this.chunks = []
-            resolve(blob)
-        })
     }
 
     dispose() {
@@ -58,6 +67,7 @@ export class Recorder extends EventTarget {
         this.disposed = true
         if (this.mediaRecorder) {
             this.mediaRecorder.removeEventListener("dataavailable", this.ondataavailable)
+            this.mediaRecorder.removeEventListener("stop", this.onstop)
             this.mediaRecorder = null
         }
     }
