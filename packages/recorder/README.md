@@ -6,7 +6,7 @@ import { Recorder } from 'recorder'
 const recorder = new Recorder()
 recorder.start()
 
-recorder.stop((blob) => {
+recorder.stop().then((blob) => {
     console.log(blob)
 })
 ```
